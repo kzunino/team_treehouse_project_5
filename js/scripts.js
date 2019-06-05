@@ -7,26 +7,11 @@ const formInputs = `<form action="#" method="get">
 </form>`;
 searchContainer.append(formInputs);         //appends HTML for search
 const galleryDiv = $('#gallery');
+const body = $('body');
+const modalContainer = $('.modal-container');
+let jsonData = '';
+modalContainer.hide();
 
-// ***** Modal Container ******
-
-const body = $('body')
-const modalMarkup = `<div class="modal-container">
-                <div class="modal">
-                    <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
-                    <div class="modal-info-container">
-                        <img class="modal-img" src="https://placehold.it/125x125" alt="profile picture">
-                        <h3 id="name" class="modal-name cap">name</h3>
-                        <p class="modal-text">email</p>
-                        <p class="modal-text cap">city</p>
-                        <hr>
-                        <p class="modal-text">(555) 555-5555</p>
-                        <p class="modal-text">123 Portland Ave., Portland, OR 97204</p>
-                        <p class="modal-text">Birthday: 10/21/2015</p>
-                    </div>
-                </div>`
-body.append(modalMarkup);
-const modalContainer = $('.modal-container').hide();
 
 // ****** 12 random users ******
 
@@ -34,12 +19,14 @@ $.ajax({
   url: 'https://randomuser.me/api/?results=12',
   dataType: 'json',
   success: function(data) {
+    jsonData = data.results;
     console.log(data)
-    data.results.forEach(user => {
+    data.results.forEach(user => {                  //iterates through each user seed
       const galleryDiv = $('#gallery');
-      const firstName = user.name.first;
+      const firstName = user.name.first;            //pulls relevant information from JSON
       const lastName = user.name.last;
       const email = user.email;
+      const street = user.location.street;
       const city = user.location.city;
       const state = user.location.state;
       const photo = user.picture.large;
@@ -57,3 +44,37 @@ $.ajax({
     })
   }
 }); //end ajax request
+
+// **** Modal Window *****
+
+
+galleryDiv.on('click', '.card', function(event) {       /* use json variable to access user information */
+  event.preventDefault();
+  let i = $(this).index();
+  const firstName = jsonData[i].name.first;
+  const lastName = jsonData[i].name.last;
+  const email = jsonData[i].email;
+  const street = jsonData[i].location.street;
+  const city = jsonData[i].location.city;
+  const state = jsonData[i].location.state;
+  const photo = jsonData[i].picture.large;
+  const phoneNumber = jsonData[i].phone;
+  const postalCode = jsonData[i].location.postcode;
+  const birthday = jsonData[i].dob.date;
+  const modalMarkup = `<div class="modal-container">
+                  <div class="modal">
+                      <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
+                      <div class="modal-info-container">
+                          <img class="modal-img" src="${photo}" alt="profile picture">
+                          <h3 id="name" class="modal-name cap">${firstName} ${lastName}</h3>
+                          <p class="modal-text">${email}</p>
+                          <p class="modal-text cap">${city}</p>
+                          <hr>
+                          <p class="modal-text">${phoneNumber}</p>
+                          <p class="modal-text">${street}, ${city}, ${state} ${postalCode}</p>
+                          <p class="modal-text">Birthday: ${birthday}</p>
+                      </div>
+                  </div>`
+  body.append(modalMarkup);
+  modalContainer.show();
+}); //end event listener
