@@ -77,4 +77,8 @@ galleryDiv.on('click', '.card', function(event) {       /* use json variable to 
                   </div>`
   body.append(modalMarkup);
   modalContainer.show();
+  $('strong').on('click', function(){
+    modalContainer.hide();
+    body.children().last().remove();
+  })
 }); //end event listener
