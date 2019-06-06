@@ -10,13 +10,13 @@ const galleryDiv = $('#gallery');
 const body = $('body');
 const modalContainer = $('.modal-container');
 let jsonData = '';
-modalContainer.hide();
+let i = '';                                    //i is the index value of whichever employee is clicked
 
 
 // ****** 12 random users ******
 
 $.ajax({
-  url: 'https://randomuser.me/api/?results=12',
+  url: 'https://randomuser.me/api/?results=12&nat=us',
   dataType: 'json',
   success: function(data) {
     jsonData = data.results;
@@ -29,7 +29,7 @@ $.ajax({
       const street = user.location.street;
       const city = user.location.city;
       const state = user.location.state;
-      const photo = user.picture.large;
+      const photo = user.picture.large;               //below uses string interpolation to add information to cards
       const userCard = `<div class="card">
                           <div class="card-img-container">
                               <img class="card-img" src="${photo}" alt="profile picture">
@@ -47,10 +47,7 @@ $.ajax({
 
 // **** Modal Window *****
 
-
-galleryDiv.on('click', '.card', function(event) {       /* use json variable to access user information */
-  event.preventDefault();
-  let i = $(this).index();
+function createModal(i){
   const firstName = jsonData[i].name.first;
   const lastName = jsonData[i].name.last;
   const email = jsonData[i].email;
@@ -61,6 +58,8 @@ galleryDiv.on('click', '.card', function(event) {       /* use json variable to 
   const phoneNumber = jsonData[i].phone;
   const postalCode = jsonData[i].location.postcode;
   const birthday = jsonData[i].dob.date;
+  let birthdate = birthday.slice(0, 10).split('-');                          //takes first 10 digits and removes dashes
+  birthdate = birthdate[1]+'/'+birthdate[2]+'/'+birthdate[0];                         //converts date to mm/dd/yyyy
   const modalMarkup = `<div class="modal-container">
                   <div class="modal">
                       <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
@@ -72,13 +71,69 @@ galleryDiv.on('click', '.card', function(event) {       /* use json variable to 
                           <hr>
                           <p class="modal-text">${phoneNumber}</p>
                           <p class="modal-text">${street}, ${city}, ${state} ${postalCode}</p>
-                          <p class="modal-text">Birthday: ${birthday}</p>
+                          <p class="modal-text">Birthday: ${birthdate}</p>
                       </div>
                   </div>`
   body.append(modalMarkup);
   modalContainer.show();
-  $('strong').on('click', function(){
+
+  const toggleModal = `<div class="modal-btn-container">
+      <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
+      <button type="button" id="modal-next" class="modal-next btn">Next</button>
+  </div>
+  </div>`
+  $('.modal-container').append(toggleModal);
+
+// *** Previous and Next and Exit Buttons  ***
+
+  $('#modal-prev').on('click', function(){              // shows previous employee on the list
+    if (i > 0 ){
+      body.children().last().remove();
+      i - 1
+      createModal(i - 1);
+    }
+  })
+
+  $('#modal-next').on('click', function(){              // shows next employee on list
+    let numberOfEmployees = $('.gallery').children().length;
+    if (i < (numberOfEmployees - 1)) {
+      body.children().last().remove();
+      i + 1
+      createModal(i + 1);
+    }
+  })
+
+  $('strong').on('click', function(){                 //exits modal when X is clicked
     modalContainer.hide();
     body.children().last().remove();
+    i = '';
   })
-}); //end event listener
+
+} //end createModal
+
+// ****** Searchbar functionaity *****
+
+const searchFunctionality = () => {
+  let searchInputValue = $('#search-input').val().toUpperCase();
+  let employees = $('.card');
+  for (let x = 0; x < employees.length; x++){
+    employees[x].style.display = 'none';
+    let employeeName = jsonData[x].name.first.toUpperCase() +" "+ jsonData[x].name.last.toUpperCase();
+    if (employeeName.toUpperCase().indexOf(searchInputValue) > -1){
+      employees[x].style.display = '';
+  }
+}
+} // end search functionalty
+
+const searchInput = $('#search-input');
+searchInput.on('keyup', function(){
+  searchFunctionality();
+})
+
+// ***** Employee Gallery Event Listener ********
+
+galleryDiv.on('click', '.card', function(event) {
+  event.preventDefault();
+  i = $(this).index();
+  createModal(i);                                      //passes userCard index number to function
+});    //end event gallery.card event listener
