@@ -112,7 +112,7 @@ function createModal(i){                            //pulls data from jsonData t
     }
   })
 
-  $('strong').on('click', function(){                 //exits modal when X is clicked
+  $('#modal-close-btn').on('click', function(){                 //exits modal when X is clicked
     let employee = $('.card')
     modalContainer.hide();
     body.children().last().remove();
