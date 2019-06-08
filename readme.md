@@ -8,7 +8,6 @@ _CSS changes:_
   transform-text: capitalize:
 }
 
--Changed background to teal to white color gradient
--H1 font color changed to darker shade of grey
--Changed html selector to have a min-height 100% so gradient doesn't repeat.
--
+Changed background to teal to white color gradient
+H1 font color changed to darker shade of grey
+Changed html selector to have a min-height 100% so gradient doesn't repeat.
