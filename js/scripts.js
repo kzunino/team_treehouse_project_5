@@ -3,15 +3,15 @@
 const searchContainer = $('.search-container');
 const formInputs = `<form action="#" method="get">
     <input type="search" id="search-input" class="search-input" placeholder="Search...">
-    <input type="submit" value="&#x1F50D;" id="serach-submit" class="search-submit">
+    <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
 </form>`;
 searchContainer.append(formInputs);         //appends HTML for search
 const galleryDiv = $('#gallery');
 const body = $('body');
 const modalContainer = $('.modal-container');
 let jsonData = '';
-let i = '';                                    //i is the index value of whichever employee is clicked
-
+let i = 0;                                    //i is the index value of whichever employee is clicked
+let visibleEmployees = [];
 
 // ****** 12 random users ******
 
@@ -19,8 +19,7 @@ $.ajax({
   url: 'https://randomuser.me/api/?results=12&nat=us',
   dataType: 'json',
   success: function(data) {
-    jsonData = data.results;
-    console.log(data)
+    jsonData = data.results;                        //stores data to access outside of request
     data.results.forEach(user => {                  //iterates through each user seed
       const galleryDiv = $('#gallery');
       const firstName = user.name.first;            //pulls relevant information from JSON
@@ -42,7 +41,7 @@ $.ajax({
                         </div>`;
       galleryDiv.append(userCard);
     })
-  }
+    }
 }); //end ajax request
 
 // **** Modal Window *****
@@ -84,29 +83,47 @@ function createModal(i){
   </div>`
   $('.modal-container').append(toggleModal);
 
-// *** Previous and Next and Exit Buttons  ***
+// *** Previous, Next and Exit Buttons  ***
 
   $('#modal-prev').on('click', function(){              // shows previous employee on the list
-    if (i > 0 ){
-      body.children().last().remove();
-      i - 1
-      createModal(i - 1);
+    let numberOfEmployees = visibleEmployees.length;
+    let employee = $('.card');
+    if (i > 0 ) {
+      //console.log("not last");
+      for (let x = i - 1; x >= 0; x--){
+      //  console.log("this is i:" + i + "this is x:" + x);
+        if (employee.eq(x).is(":visible")){
+      //    console.log("employee:"+employee[x]);
+          body.children().last().remove();
+          createModal(x);
+          break;
+        }
+      }
     }
   })
 
   $('#modal-next').on('click', function(){              // shows next employee on list
-    let numberOfEmployees = $('.gallery').children().length;
+    let numberOfEmployees = visibleEmployees.length;
+    let employee = $('.card');
     if (i < (numberOfEmployees - 1)) {
-      body.children().last().remove();
-      i + 1
-      createModal(i + 1);
+    //  console.log("not last");
+      for (let x = i + 1; x <= numberOfEmployees; x++){
+    //    console.log("this is i:" + i + "this is x:" + x);
+        if (employee.eq(x).is(":visible")){
+         // console.log("employee:"+employee[x]);
+          body.children().last().remove();
+          createModal(x);
+          break;
+        }
+      }
     }
   })
 
   $('strong').on('click', function(){                 //exits modal when X is clicked
+    let employee = $('.card')
     modalContainer.hide();
     body.children().last().remove();
-    i = '';
+    i = 0;                                           //resets i to empty string
   })
 
 } //end createModal
@@ -115,18 +132,32 @@ function createModal(i){
 
 const searchFunctionality = () => {
   let searchInputValue = $('#search-input').val().toUpperCase();
-  let employees = $('.card');
-  for (let x = 0; x < employees.length; x++){
-    employees[x].style.display = 'none';
+  let employee = $('.card');
+  visibleEmployees = [];
+  i = 0;
+
+  for (let x = 0; x < employee.length; x++){
+    employee[x].style.display = 'none';
+    //employee.eq(x).removeClass('visible');
     let employeeName = jsonData[x].name.first.toUpperCase() +" "+ jsonData[x].name.last.toUpperCase();
     if (employeeName.toUpperCase().indexOf(searchInputValue) > -1){
-      employees[x].style.display = '';
+      employee[x].style.display = '';
+      visibleEmployees.push(employee[x]);
+      //employee.eq(x).addClass('visible')
+
   }
 }
 } // end search functionalty
 
+// **** Search Event Listeners ******
+
 const searchInput = $('#search-input');
 searchInput.on('keyup', function(){
+  searchFunctionality();
+})
+
+const searchButton = $('#search-submit');
+searchButton.on('click', function(event) {
   searchFunctionality();
 })
 
@@ -134,6 +165,12 @@ searchInput.on('keyup', function(){
 
 galleryDiv.on('click', '.card', function(event) {
   event.preventDefault();
-  i = $(this).index();
+  let employees = $('.card');
+  for (let x = 0; x < employees.length; x++) {
+      visibleEmployees.push(employees[x]);
+    }
+  i = ($(this).index());                                // i is employee index value
+  console.log(i);
   createModal(i);                                      //passes userCard index number to function
+
 });    //end event gallery.card event listener
