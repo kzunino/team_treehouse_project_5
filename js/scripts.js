@@ -9,8 +9,8 @@ searchContainer.append(formInputs);         //appends HTML for search
 const galleryDiv = $('#gallery');
 const body = $('body');
 const modalContainer = $('.modal-container');
-let jsonData = '';
-let i = 0;                                    //i is the index value of whichever employee is clicked
+let jsonData = '';                            //stores JSON data to create modals
+let i = 0;                                    //i is the index value of whichever employee modal is clicked
 let visibleEmployees = [];
 
 // ****** 12 random users ******
@@ -46,7 +46,7 @@ $.ajax({
 
 // **** Modal Window *****
 
-function createModal(i){
+function createModal(i){                            //pulls data from jsonData to populate modal
   const firstName = jsonData[i].name.first;
   const lastName = jsonData[i].name.last;
   const email = jsonData[i].email;
@@ -58,7 +58,7 @@ function createModal(i){
   const postalCode = jsonData[i].location.postcode;
   const birthday = jsonData[i].dob.date;
   let birthdate = birthday.slice(0, 10).split('-');                          //takes first 10 digits and removes dashes
-  birthdate = birthdate[1]+'/'+birthdate[2]+'/'+birthdate[0];                         //converts date to mm/dd/yyyy
+  birthdate = birthdate[1]+'/'+birthdate[2]+'/'+birthdate[0];                //converts date to mm/dd/yyyy
   const modalMarkup = `<div class="modal-container">
                   <div class="modal">
                       <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
@@ -74,7 +74,6 @@ function createModal(i){
                       </div>
                   </div>`
   body.append(modalMarkup);
-  modalContainer.show();
 
   const toggleModal = `<div class="modal-btn-container">
       <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
@@ -89,11 +88,8 @@ function createModal(i){
     let numberOfEmployees = visibleEmployees.length;
     let employee = $('.card');
     if (i > 0 ) {
-      //console.log("not last");
       for (let x = i - 1; x >= 0; x--){
-      //  console.log("this is i:" + i + "this is x:" + x);
         if (employee.eq(x).is(":visible")){
-      //    console.log("employee:"+employee[x]);
           body.children().last().remove();
           createModal(x);
           break;
@@ -105,15 +101,12 @@ function createModal(i){
   $('#modal-next').on('click', function(){              // shows next employee on list
     let numberOfEmployees = visibleEmployees.length;
     let employee = $('.card');
-    if (i < (numberOfEmployees - 1)) {
-    //  console.log("not last");
-      for (let x = i + 1; x <= numberOfEmployees; x++){
-    //    console.log("this is i:" + i + "this is x:" + x);
-        if (employee.eq(x).is(":visible")){
-         // console.log("employee:"+employee[x]);
+    if (i < (numberOfEmployees - 1)) {                      // - 1 to reference last index value of visibleEmployees array
+      for (let x = i + 1; x <= numberOfEmployees; x++){     //numberOfEmployees stops the
+        if (employee.eq(x).is(":visible")){                 //if employee is visible passes x as index value for modal
           body.children().last().remove();
           createModal(x);
-          break;
+          break;                                          //stops loop after first visible modal is created
         }
       }
     }
@@ -136,15 +129,12 @@ const searchFunctionality = () => {
   visibleEmployees = [];
   i = 0;
 
-  for (let x = 0; x < employee.length; x++){
+  for (let x = 0; x < employee.length; x++){    //checks input against letters in name.
     employee[x].style.display = 'none';
-    //employee.eq(x).removeClass('visible');
     let employeeName = jsonData[x].name.first.toUpperCase() +" "+ jsonData[x].name.last.toUpperCase();
     if (employeeName.toUpperCase().indexOf(searchInputValue) > -1){
       employee[x].style.display = '';
-      visibleEmployees.push(employee[x]);
-      //employee.eq(x).addClass('visible')
-
+      visibleEmployees.push(employee[x]);       //updates visible employee array with visible employees for length
   }
 }
 } // end search functionalty
@@ -169,8 +159,7 @@ galleryDiv.on('click', '.card', function(event) {
   for (let x = 0; x < employees.length; x++) {
       visibleEmployees.push(employees[x]);
     }
-  i = ($(this).index());                                // i is employee index value
-  console.log(i);
+  i = ($(this).index());                                // i is employee index value of clicked employee card
   createModal(i);                                      //passes userCard index number to function
 
 });    //end event gallery.card event listener
