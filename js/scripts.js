@@ -85,13 +85,15 @@ function createModal(i){                            //pulls data from jsonData t
 // *** Previous, Next and Exit Buttons  ***
 
   $('#modal-prev').on('click', function(){              // shows previous employee on the list
-    let numberOfEmployees = visibleEmployees.length;
     let employee = $('.card');
     if (i > 0 ) {
       for (let x = i - 1; x >= 0; x--){
         if (employee.eq(x).is(":visible")){
           body.children().last().remove();
           createModal(x);
+          if (employee[x] === visibleEmployees[0]) {
+            removePrev();
+          }
           break;
         }
       }
@@ -99,17 +101,20 @@ function createModal(i){                            //pulls data from jsonData t
   })
 
   $('#modal-next').on('click', function(){              // shows next employee on list
-    let numberOfEmployees = visibleEmployees.length;
     let employee = $('.card');
+    let numberOfEmployees = employee.length;
     if (i < (numberOfEmployees - 1)) {                      // - 1 to reference last index value of visibleEmployees array
-      for (let x = i + 1; x <= numberOfEmployees; x++){     //numberOfEmployees stops the
+      for (let x = i + 1; x <= numberOfEmployees; x++){     //loops until it finds next visible employee if exists
         if (employee.eq(x).is(":visible")){                 //if employee is visible passes x as index value for modal
           body.children().last().remove();
           createModal(x);
+          if (x === numberOfEmployees - 1 || employee[x] == visibleEmployees[visibleEmployees.length - 1]) {   //index is last
+            removeNext();
+          }
           break;                                          //stops loop after first visible modal is created
         }
+        }
       }
-    }
   })
 
   $('#modal-close-btn').on('click', function(){                 //exits modal when X is clicked
@@ -148,6 +153,7 @@ searchInput.on('keyup', function(){
 
 const searchButton = $('#search-submit');
 searchButton.on('click', function(event) {
+  event.preventDefault();
   searchFunctionality();
 })
 
@@ -156,10 +162,27 @@ searchButton.on('click', function(event) {
 galleryDiv.on('click', '.card', function(event) {
   event.preventDefault();
   let employees = $('.card');
+  visibleEmployees = [];
   for (let x = 0; x < employees.length; x++) {
-      visibleEmployees.push(employees[x]);
+      if (employees.eq(x).is(":visible")){
+        visibleEmployees.push(employees[x]);
+      }
     }
   i = ($(this).index());                                // i is employee index value of clicked employee card
   createModal(i);                                      //passes userCard index number to function
-
+  if (i === 0 || employees[i] === visibleEmployees[0]){     //if employee[i] === to same div as visibleEmployee
+    removePrev();
+  }
+  if (employees[i] === visibleEmployees[visibleEmployees.length - 1] || employees[i] === employees[employees.length - 1]){
+    removeNext();
+  }
 });    //end event gallery.card event listener
+
+function removeNext(){
+  $('#modal-next').remove();
+}
+
+function removePrev(){
+  $('#modal-prev').remove();
+
+}
