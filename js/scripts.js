@@ -9,9 +9,13 @@ searchContainer.append(formInputs);         //appends HTML for search
 const galleryDiv = $('#gallery');
 const body = $('body');
 const modalContainer = $('.modal-container');
+const searchInput = $('#search-input');
+const searchButton = $('#search-submit');
+
+
 let jsonData = '';                            //stores JSON data to create modals
 let i = 0;                                    //i is the index value of whichever employee modal is clicked
-let visibleEmployees = [];
+let visibleEmployees = [];                    // empty array to store visible employees
 
 // ****** 12 random users ******
 
@@ -87,11 +91,11 @@ function createModal(i){                            //pulls data from jsonData t
   $('#modal-prev').on('click', function(){              // shows previous employee on the list
     let employee = $('.card');
     if (i > 0 ) {
-      for (let x = i - 1; x >= 0; x--){
+      for (let x = i - 1; x >= 0; x--){                 //checks for previous visible employee
         if (employee.eq(x).is(":visible")){
           body.children().last().remove();
-          createModal(x);
-          if (employee[x] === visibleEmployees[0]) {
+          createModal(x);                              //if visible employee exists, creates modal
+          if (employee[x] === visibleEmployees[0]) {    //if employee index === index 0 of visible employees, removes prev
             removePrev();
           }
           break;
@@ -146,12 +150,10 @@ const searchFunctionality = () => {
 
 // **** Search Event Listeners ******
 
-const searchInput = $('#search-input');
 searchInput.on('keyup', function(){
   searchFunctionality();
 })
 
-const searchButton = $('#search-submit');
 searchButton.on('click', function(event) {
   event.preventDefault();
   searchFunctionality();
@@ -163,7 +165,7 @@ galleryDiv.on('click', '.card', function(event) {
   event.preventDefault();
   let employees = $('.card');
   visibleEmployees = [];
-  for (let x = 0; x < employees.length; x++) {
+  for (let x = 0; x < employees.length; x++) {           //updates array of visible employees when clicked
       if (employees.eq(x).is(":visible")){
         visibleEmployees.push(employees[x]);
       }
